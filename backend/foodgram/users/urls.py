@@ -1,15 +1,15 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import SubscriptionsListView, SubscriptionsViewSet, UserViewSet
+from api.views import SubscriptionsView, SubscriptionsViewSet, UserViewSet
 
 app_name = 'users'
 router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='users')
-router.register(r'users', SubscriptionsViewSet, basename='subscribe')
+router.register('users', UserViewSet, basename='users')
+router.register('users', SubscriptionsViewSet, basename='subscribe')
 
 urlpatterns = [
-    path('users/subscriptions/', SubscriptionsListView.as_view(),
+    path('users/subscriptions/', SubscriptionsView.as_view(),
          name='subscriptions'),
     path('', include(router.urls)),
     path('', include('djoser.urls')),
