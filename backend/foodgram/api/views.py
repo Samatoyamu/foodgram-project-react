@@ -1,14 +1,12 @@
 import django_filters
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from recipes.models import Favorites, Ingredients, Recipes, ShoppingCart, Tags
 from users.models import Subscribe, User
 from .filters import IngredientsFilter, RecipesFilters
-from .pagination import CustomPagination
 from .permissions import IsAuthenticatedOrReadOnly
 from .serializers import (FavoriteShoppingSerializer, IngredientsSerializer,
                           RecipesSerializer, SubscriptionsSerializer,
@@ -22,7 +20,6 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    pagination_class = CustomPagination
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -35,7 +32,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['POST', 'DELETE'],
         detail=True,
-        permission_classes=(permissions.IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
         recipe = ShoppingCart.objects.filter(user=self.request.user,
@@ -70,7 +66,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['POST', 'DELETE'],
         detail=True,
-        permission_classes=(permissions.IsAuthenticated,)
     )
     def favorite(self, request, pk):
         favorite = Favorites.objects.filter(user=self.request.user,
@@ -111,60 +106,57 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('^name',)
 
 
-class UserViewSet(UserViewSet):
-    pagination_class = CustomPagination
-
-
-class SubscriptionsView(generics.ListAPIView):
-    queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = SubscriptionsSerializer
-    pagination_class = CustomPagination
-
-    def get_queryset(self):
-        return User.objects.filter(following__user=self.request.user)
-
-
 class SubscriptionsViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = SubscriptionsSerializer
 
     @action(
-         detail=True,
-         methods=['POST', 'DELETE']
-     )
+        detail=False,
+        methods=['GET']
+    )
+    def subscriptions(self, request):
+        users = User.objects.filter(following__user=self.request.user)
+        serializer = SubscriptionsSerializer(
+                users,
+                context={'request': request},
+                many=True)
+        return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE']
+    )
     def subscribe(self, request, pk):
         author = get_object_or_404(User, pk=pk)
-        subs = Subscribe.objects.filter(user=self.request.user,
-                                        author=author).exists()
+        subs = self.request.user.follower.filter(author=author).exists()
         if request.method == 'POST':
             if subs:
                 return Response(
-                     {'errors': 'уже есть подписка'},
-                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                    {'errors': 'уже есть подписка'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             if author == self.request.user:
                 return Response(
-                     {'errors': 'На себя нельзя подписаться'},
-                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                    {'errors': 'На себя нельзя подписаться'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             serializer = SubscriptionsSerializer(
-                 author,
-                 context={'request': request}
-                 )
+                author,
+                context={'request': request}
+                )
             Subscribe.objects.create(user=self.request.user,
                                      author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             if not subs:
                 return Response(
-                     {'errors': 'Не было в подписках'},
-                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                    {'errors': 'Не было в подписках'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             Subscribe.objects.filter(user=self.request.user,
                                      author=author).delete()
             return Response(
-                     {'success': 'Отписались'},
-                     status=status.HTTP_204_NO_CONTENT
-                 )
+                    {'success': 'Отписались'},
+                    status=status.HTTP_204_NO_CONTENT
+                )

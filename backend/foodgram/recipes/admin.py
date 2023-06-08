@@ -18,20 +18,20 @@ class TagsAdmin(admin.ModelAdmin):
 class IngredientsAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
     search_fields = ('name',)
-    list_filter = ('name', )
+    list_filter = ('name',)
     list_display_links = ('name',)
     empty_value_display = '-пусто-'
 
 
 class RecipeIngredientInline(admin.TabularInline):
-    model = Recipes.ingredients.through
+    model = IngredientInRecipe
     extra = 1
 
 
 @admin.register(Recipes)
 class RecipesAdmin(admin.ModelAdmin):
     inlines = (RecipeIngredientInline,)
-    list_display = ('id', 'name', 'author')
+    list_display = ('id', 'name', 'author', 'pub_date')
     search_fields = ('name',)
     list_filter = ('author', 'name', 'tags')
     ordering = ('id',)
@@ -40,7 +40,7 @@ class RecipesAdmin(admin.ModelAdmin):
 
     @admin.display(description='Добавили в избранное')
     def favorite_count(self, recipes):
-        return recipes.favorites_recipes.count()
+        return Favorites.objects.filter(recipe=recipes).count()
 
 
 @admin.register(IngredientInRecipe)

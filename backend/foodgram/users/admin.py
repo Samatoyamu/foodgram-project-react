@@ -26,7 +26,7 @@ class UserAdmin(admin.ModelAdmin):
                 'fields':  ('is_active', 'is_staff', 'is_superuser')
             },
         )
-     )
+    )
 
 
 @admin.register(Subscribe)
