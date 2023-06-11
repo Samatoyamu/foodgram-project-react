@@ -43,7 +43,6 @@ class Ingredients(models.Model):
         'Название ингредиента',
         help_text=f'Уникальное название, '
                   f'не более {settings.INGREDIENTS_NAME_MAX_LENGTH} символов',
-        unique=True,
         max_length=settings.INGREDIENTS_NAME_MAX_LENGTH,
         validators=(validate_name(),),
     )
@@ -163,7 +162,7 @@ class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         Recipes,
         on_delete=models.CASCADE,
-        related_name='+',
+        related_name='recipes_cart',
         verbose_name='Рецепт'
     )
 
@@ -190,7 +189,7 @@ class Favorites(models.Model):
         Recipes,
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
-        related_name='+',
+        related_name='favorites_recipes',
     )
 
     class Meta:
