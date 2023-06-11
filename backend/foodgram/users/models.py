@@ -17,14 +17,14 @@ class User(AbstractUser):
         'Имя',
         help_text=f'Имя, не более '
                   f'{settings.USER_FIRST_LAST_NAME_LENGTH} символов',
-        validators=(validate_name,),
+        validators=(validate_name(),),
         max_length=settings.USER_FIRST_LAST_NAME_LENGTH
     )
     last_name = models.CharField(
         'Фамилия',
         help_text=f'Фамилия, не более '
                   f'{settings.USER_FIRST_LAST_NAME_LENGTH} символов',
-        validators=(validate_name,),
+        validators=(validate_name(),),
         max_length=settings.USER_FIRST_LAST_NAME_LENGTH
     )
     USERNAME_FIELD = 'email'

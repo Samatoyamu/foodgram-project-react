@@ -134,3 +134,6 @@ dmypy.json
 # media folder
 backend/foodgram/recipes/images/
 backend/foodgram/media
+
+# vscode
+.vscode

@@ -13,14 +13,14 @@ class Tags(models.Model):
                   f'не более {settings.TAGS_SLUG_NAME_MAX_LENGTH} символов',
         unique=True,
         max_length=settings.TAGS_SLUG_NAME_MAX_LENGTH,
-        validators=(validate_name,),
+        validators=(validate_name(),),
     )
     color = models.CharField(
         'Цвет(HEX)',
         help_text=f'Поле HEX, не более {settings.HEX_COLOR_LENGTH} символов',
         unique=True,
         max_length=settings.HEX_COLOR_LENGTH,
-        validators=(validate_hex,),
+        validators=(validate_hex(),),
     )
     slug = models.SlugField(
         'Слэг тега',
@@ -45,7 +45,7 @@ class Ingredients(models.Model):
                   f'не более {settings.INGREDIENTS_NAME_MAX_LENGTH} символов',
         unique=True,
         max_length=settings.INGREDIENTS_NAME_MAX_LENGTH,
-        validators=(validate_name,),
+        validators=(validate_name(),),
     )
     measurement_unit = models.CharField(
         'Единица измерения',

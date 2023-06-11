@@ -1,19 +1,22 @@
 version: '3.8'
 services:
+
   frontend:
     build:
-      context: ../frontend
+      image: realstaticvoid/foodgram_frontend:latest
       dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
+
   db:
     image: postgres:13.0-alpine
     volumes:
       - db_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
+
   backend:
-    build: ../backend/foodgram/
+    image: realstaticvoid/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
@@ -22,6 +25,7 @@ services:
        - db
     env_file:
       - ./.env
+
   nginx:
     image: nginx:1.19.3
     ports:
@@ -34,6 +38,7 @@ services:
       - media_value:/var/html/media/
     depends_on:
       - backend
+
 volumes: 
   db_data:
   static_value:
