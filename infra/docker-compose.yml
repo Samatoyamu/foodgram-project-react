@@ -2,9 +2,7 @@ version: '3.8'
 services:
 
   frontend:
-    build:
-      image: realstaticvoid/foodgram_frontend:latest
-      dockerfile: Dockerfile
+    image: realstaticvoid/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
 
