@@ -1,4 +1,5 @@
 import os
+from distutils.util import strtobool
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -9,9 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = (os.getenv('DEBUG', 'False') == 'True')
+DEBUG = bool(strtobool(os.getenv('DEBUG', 'True')))
 
-ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 
 INSTALLED_APPS = [
@@ -138,10 +139,8 @@ DJOSER = {
     },
 }
 
-TAGS_SLUG_NAME_MAX_LENGTH = 200
+NAME_MAX_LENGTH = 200
 HEX_COLOR_LENGTH = 7
 EMAIL_LENGTH = 254
 INGREDIENTS_MEASUREMENT_LENGHT = 20
-INGREDIENTS_NAME_MAX_LENGTH = 200
-RECIPES_NAME_MAX_LENGTH = 200
 USER_FIRST_LAST_NAME_LENGTH = 150

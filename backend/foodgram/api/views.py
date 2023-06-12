@@ -106,14 +106,12 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('^name',)
 
 
-class SubscriptionsViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+class SubscriptionsViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = SubscriptionsSerializer
 
     @action(
         detail=False,
-        methods=['GET']
+        methods=['GET'],
     )
     def subscriptions(self, request):
         users = User.objects.filter(following__user=self.request.user)
@@ -125,7 +123,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['POST', 'DELETE']
+        methods=['POST', 'DELETE'],
     )
     def subscribe(self, request, pk):
         author = get_object_or_404(User, pk=pk)

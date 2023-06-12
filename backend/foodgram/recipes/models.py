@@ -3,31 +3,31 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from users.models import User
-from .validators import validate_name, validate_hex
+from .validators import ValidateHex, ValidateName
 
 
 class Tags(models.Model):
     name = models.CharField(
         'Название тега',
         help_text=f'Название тега, '
-                  f'не более {settings.TAGS_SLUG_NAME_MAX_LENGTH} символов',
+                  f'не более {settings.NAME_MAX_LENGTH} символов',
         unique=True,
-        max_length=settings.TAGS_SLUG_NAME_MAX_LENGTH,
-        validators=(validate_name(),),
+        max_length=settings.NAME_MAX_LENGTH,
+        validators=(ValidateName(),),
     )
     color = models.CharField(
         'Цвет(HEX)',
         help_text=f'Поле HEX, не более {settings.HEX_COLOR_LENGTH} символов',
         unique=True,
         max_length=settings.HEX_COLOR_LENGTH,
-        validators=(validate_hex(),),
+        validators=(ValidateHex(),),
     )
     slug = models.SlugField(
         'Слэг тега',
         help_text=f'Уникальный слэг, '
-                  f'не более {settings.TAGS_SLUG_NAME_MAX_LENGTH} символов',
+                  f'не более {settings.NAME_MAX_LENGTH} символов',
         unique=True,
-        max_length=settings.TAGS_SLUG_NAME_MAX_LENGTH,
+        max_length=settings.NAME_MAX_LENGTH,
     )
 
     class Meta:
@@ -42,16 +42,16 @@ class Ingredients(models.Model):
     name = models.CharField(
         'Название ингредиента',
         help_text=f'Уникальное название, '
-                  f'не более {settings.INGREDIENTS_NAME_MAX_LENGTH} символов',
-        max_length=settings.INGREDIENTS_NAME_MAX_LENGTH,
-        validators=(validate_name(),),
+                  f'не более {settings.NAME_MAX_LENGTH} символов',
+        max_length=settings.NAME_MAX_LENGTH,
+        validators=(ValidateName(),),
     )
     measurement_unit = models.CharField(
         'Единица измерения',
         help_text=f'Единица измерения, '
-                  f'не более {settings.INGREDIENTS_MEASUREMENT_LENGHT} '
+                  f'не более {settings.NAME_MAX_LENGTH} '
                   f'символов',
-        max_length=settings.INGREDIENTS_MEASUREMENT_LENGHT,
+        max_length=settings.NAME_MAX_LENGTH,
     )
 
     class Meta:
@@ -86,8 +86,8 @@ class Recipes(models.Model):
     name = models.CharField(
         'Название рецепта',
         help_text=f'Название рецепта, '
-                  f'не более {settings.RECIPES_NAME_MAX_LENGTH} символов',
-        max_length=settings.RECIPES_NAME_MAX_LENGTH
+                  f'не более {settings.NAME_MAX_LENGTH} символов',
+        max_length=settings.NAME_MAX_LENGTH
     )
     image = models.ImageField(
         'Изображение',
@@ -157,7 +157,7 @@ class ShoppingCart(models.Model):
         User,
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
-        related_name='shop_cart',
+        related_name='+',
     )
     recipe = models.ForeignKey(
         Recipes,
@@ -183,7 +183,7 @@ class Favorites(models.Model):
         User,
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
-        related_name='favorites_user',
+        related_name='+',
     )
     recipe = models.ForeignKey(
         Recipes,
