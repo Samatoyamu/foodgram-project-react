@@ -1,4 +1,4 @@
-хост - foodgramer.ddns.net
+хост - foodgramer.ddns.net\
 админка:
-    почта - admin@admin.ru
-    пароль - admin
+ - почта : admin@admin.ru
+ - пароль : admin
