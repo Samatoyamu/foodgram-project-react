@@ -1,6 +1,6 @@
 import django_filters
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -106,22 +106,17 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('^name',)
 
 
-class SubscriptionsViewSet(viewsets.ModelViewSet):
+class SubscriptionsListView(generics.ListAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = SubscriptionsSerializer
 
-    @action(
-        detail=False,
-        methods=['GET']
-    )
-    def subscriptions(self, request):
-        users = User.objects.filter(following__user=self.request.user)
-        serializer = SubscriptionsSerializer(
-                users,
-                context={'request': request},
-                many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return User.objects.filter(following__user=self.request.user)
+
+
+class SubscriptionsViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAuthenticated,)
 
     @action(
         detail=True,
