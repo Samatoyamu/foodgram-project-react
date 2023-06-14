@@ -114,8 +114,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .values('ingredient__name', 'ingredient__measurement_unit')
             .annotate(sum_amount=Sum('amount')).order_by('amount')
         )
-        data_dict = {}
         ingredients_list = []
+        data_dict = {}
         for item in ingredients:
             name = item['ingredient__name']
             measure = item['ingredient__measurement_unit']

@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from users.models import User
-from .validators import ValidateHex, ValidateName
+from .validators import ValidateHex, ValidateName, ValidateRecipeName
 
 
 class Tags(models.Model):
@@ -88,7 +88,7 @@ class Recipes(models.Model):
         help_text=f'Название рецепта, '
                   f'не более {settings.NAME_MAX_LENGTH} символов',
         max_length=settings.NAME_MAX_LENGTH,
-        validators=(ValidateName(),)
+        validators=(ValidateRecipeName(),)
     )
     image = models.ImageField(
         'Изображение',
