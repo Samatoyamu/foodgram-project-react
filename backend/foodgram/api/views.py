@@ -1,12 +1,16 @@
 import django_filters
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from recipes.models import Favorites, Ingredients, Recipes, ShoppingCart, Tags
+from recipes.models import (Favorites, IngredientInRecipe, Ingredients,
+                            Recipes, ShoppingCart, Tags)
 from users.models import Subscribe, User
 from .filters import IngredientsFilter, RecipesFilters
+from .pagination import CustomPagination
 from .permissions import IsAuthenticatedOrReadOnly
 from .serializers import (FavoriteShoppingSerializer, IngredientsSerializer,
                           RecipesSerializer, SubscriptionsSerializer,
@@ -97,6 +101,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_204_NO_CONTENT
                 )
 
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def download_shopping_cart(self, request):
+        ingredients = (
+            IngredientInRecipe.objects.filter(
+                recipe__recipes_cart__user=request.user
+            )
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(sum_amount=Sum('amount')).order_by('amount')
+        )
+        data_dict = {}
+        ingredients_list = []
+        for item in ingredients:
+            name = item['ingredient__name']
+            measure = item['ingredient__measurement_unit']
+            sum_amount = item['sum_amount']
+            data_dict[name] = [sum_amount, measure]
+        for id, (key, value) in enumerate(data_dict.items()):
+            ingredients_list.append(
+                f'{id}. {key} - ' f'{value[0]} ' f'{value[1]}'
+            )
+        return HttpResponse('\n'.join(ingredients_list),
+                            content_type='text/plain',
+                            status=status.HTTP_200_OK)
+
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredients.objects.all()
@@ -106,8 +138,11 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('^name',)
 
 
-class SubscriptionsViewSet(viewsets.ViewSet):
+class SubscriptionsViewSet(viewsets.ViewSetMixin,
+                           generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = CustomPagination
+    serializer_class = SubscriptionsSerializer
 
     @action(
         detail=False,
@@ -115,10 +150,11 @@ class SubscriptionsViewSet(viewsets.ViewSet):
     )
     def subscriptions(self, request):
         users = User.objects.filter(following__user=self.request.user)
-        serializer = SubscriptionsSerializer(
-                users,
-                context={'request': request},
-                many=True)
+        page = self.paginate_queryset(users)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
 
     @action(
