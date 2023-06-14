@@ -87,7 +87,8 @@ class Recipes(models.Model):
         'Название рецепта',
         help_text=f'Название рецепта, '
                   f'не более {settings.NAME_MAX_LENGTH} символов',
-        max_length=settings.NAME_MAX_LENGTH
+        max_length=settings.NAME_MAX_LENGTH,
+        validators=(ValidateName(),)
     )
     image = models.ImageField(
         'Изображение',

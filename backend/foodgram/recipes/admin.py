@@ -26,12 +26,13 @@ class IngredientsAdmin(admin.ModelAdmin):
 class RecipeIngredientInline(admin.TabularInline):
     model = IngredientInRecipe
     extra = 1
+    min_num = 1
 
 
 @admin.register(Recipes)
 class RecipesAdmin(admin.ModelAdmin):
     inlines = (RecipeIngredientInline,)
-    list_display = ('id', 'name', 'author', 'pub_date')
+    list_display = ('id', 'name', 'author', 'pub_date', 'favorite_count')
     search_fields = ('name',)
     list_filter = ('author', 'name', 'tags')
     ordering = ('id',)
@@ -41,13 +42,6 @@ class RecipesAdmin(admin.ModelAdmin):
     @admin.display(description='Добавили в избранное')
     def favorite_count(self, recipes):
         return Favorites.objects.filter(recipe=recipes).count()
-
-
-@admin.register(IngredientInRecipe)
-class IngredientInRecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'recipe', 'ingredient', 'amount')
-    list_display_links = ('recipe',)
-    search_fields = ('recipe',)
 
 
 @admin.register(ShoppingCart)
